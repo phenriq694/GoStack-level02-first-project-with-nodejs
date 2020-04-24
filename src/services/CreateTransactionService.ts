@@ -15,16 +15,14 @@ class CreateTransactionService {
   }
 
   public execute({ title, value, type }: Request): Transaction {
-    if (type.toLowerCase() !== 'income' && type.toLowerCase() !== 'outcome') {
+    if (!['income', 'outcome'].includes(type.toLowerCase())) {
       throw Error('Transaction Type invalid');
     }
 
-    if (type.toLowerCase() === 'outcome') {
-      const { total } = this.transactionsRepository.getBalance();
+    const { total } = this.transactionsRepository.getBalance();
 
-      if (total < value) {
-        throw Error('Outcome is bigger than total');
-      }
+    if (type.toLowerCase() === 'outcome' && total < value) {
+      throw new Error('Outcome is bigger than total');
     }
 
     const transaction = this.transactionsRepository.create({
